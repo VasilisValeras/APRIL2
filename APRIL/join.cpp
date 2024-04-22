@@ -253,7 +253,7 @@ int compareIntervals(vector<ID> &ar1, uint &numintervals1, vector<ID> &ar2, uint
 	return 0;
 }
 
-int compareExternal(vector<ID> &ar1, uint &numintervals1, vector<ID> &ar2, uint &numintervals2, vector<ID> &ar3, uint &numintervals3){
+int compareExternal(vector<uint32_t> &ar1, uint &numintervals1, vector<uint32_t> &ar2, uint &numintervals2, vector<uint32_t> &ar3, uint &numintervals3){
     
     if(numintervals1 == 0 || numintervals2 == 0){
         return 0;
@@ -261,15 +261,21 @@ int compareExternal(vector<ID> &ar1, uint &numintervals1, vector<ID> &ar2, uint 
 
     uint cur1 = 0;
     uint cur2 = 0;
+
+    // cout << "Initial values:\n";
+    // cout << "ar1 size: " << ar1.size() << ", ar2 size: " << ar2.size() << ", ar3 size: " << ar3.size() << "\n";
+    // cout << "numintervals1: " << numintervals1 << ", numintervals2: " << numintervals2 << ", numintervals3: " << numintervals3 << "\n";
+
+
+	if((*ar2.begin() <= *ar3.begin()) || (*ar2.end() >= *ar3.end())) {
+		return 1;
+	}
+
+
 	
-	
-    //auto st1 = min(ar3.begin(), ar2.begin()); 
-	// Using min to compare values at the beginning of ar2 and ar3
-    auto minVal = std::min(*ar2.begin(), *ar3.begin());
-    auto st1 = ar3.begin();
-	
-	
+	auto st1 = (*ar2.begin() < *ar3.begin()) ? ar2.begin() : ar3.begin();
     auto end1 = ar1.begin();
+	cur1++;
 
 	
     
@@ -280,23 +286,30 @@ int compareExternal(vector<ID> &ar1, uint &numintervals1, vector<ID> &ar2, uint 
     bool isFirstIteration = true;
 
     do {
+
+        // cout << "Iteration:\n";
+        // cout << "st1: " << *st1 << ", end1: " << *end1 << "\n";
+        // cout << "st2: " << *st2 << ", end2: " << *end2 << "\n";
+        // cout << "cur1: " << cur1 << ", cur2: " << cur2 << "\n";
+
+		if(*st1 == *st2){
+			return 1;
+		}
         if (*st1 < *st2) {
             if (*end1 >= *st2) {
                 return 1;
             } else {
-                if (isFirstIteration) {
+                if (cur1 == numintervals1) {
+                    
+                    st1 = ar1.end()-1; 
+					end1 = (*(ar2.end()-1) > *(ar3.end()-1)) ? ar2.end()-1 : ar3.end()-1;
+                    cur1++;
+                } else if(isFirstIteration){
                     st1 = ar1.begin() + 1;
                     end1 = ar1.begin() + 2;
-                    cur1 = 1;
-                    isFirstIteration = false;
-                } else if(cur1+1 == numintervals1){
-                    st1 = ar1.end(); 
-
-
-                    //end1 = max(ar3.end(), end2); 
-					auto maxVal = std::max(*ar2.end(), *ar3.end());
-					end1 = ar3.end();
                     cur1++;
+                    isFirstIteration = false;
+                    
                 } else {
                     st1 += 2;
                     end1 += 2;
@@ -304,7 +317,7 @@ int compareExternal(vector<ID> &ar1, uint &numintervals1, vector<ID> &ar2, uint 
                 }
             }
         } else {
-            if (*end2 > *st1) {
+            if (*end2 >= *st1) {
                 return 1;
             } else {
                 st2 += 2;
@@ -312,17 +325,10 @@ int compareExternal(vector<ID> &ar1, uint &numintervals1, vector<ID> &ar2, uint 
                 cur2++;
             }
         }
-    } while(cur1 <= numintervals1 && cur2 <= numintervals2);
+    } while(cur1 <= numintervals1+1 && cur2 <= numintervals2);
 
     return 0;
 }
-
-
-
-
-
-
-
 
 
 bool intervalsOverlap(ID &st1, ID &end1, ID &st2, ID &end2){
@@ -528,35 +534,6 @@ int joinPolygons_uncompressed(Polygon *polA, Polygon *polB){
 // DE-9IM addition
 int joinPolygons_DE9IM(Polygon *polA, Polygon *polB) {
 
-	if(polA->recID == 9718& polB->recID == 155102) {
-		// Print contents of uncompressedALL for polA
-		std::cout << "polA uncompressedALL: ";
-		for (const auto& id : polA->uncompressedALL) {
-			std::cout << id << " ";
-		}
-		std::cout << std::endl;
-		
-		// Print contents of uncompressedF for polA
-		std::cout << "polA uncompressedF: ";
-		for (const auto& id : polA->uncompressedF) {
-			std::cout << id << " ";
-		}
-		std::cout << std::endl;
-		
-		// Print contents of uncompressedALL for polB
-		std::cout << "polB uncompressedALL: ";
-		for (const auto& id : polB->uncompressedALL) {
-			std::cout << id << " ";
-		}
-		std::cout << std::endl;
-		
-		// Print contents of uncompressedF for polB
-		std::cout << "polB uncompressedF: ";
-		for (const auto& id : polB->uncompressedF) {
-			std::cout << id << " ";
-		}
-		std::cout << std::endl;
-	}
 	//check ALL - ALL
 	if(compareIntervals(polA->uncompressedALL, polA->numIntervalsALL, polB->uncompressedALL, polB->numIntervalsALL) == 0){
 		//guaranteed not hit

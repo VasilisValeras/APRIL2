@@ -51,6 +51,7 @@ string result_filename = "results_pairs.csv";
 double intermediateFilterTime = 0;
 double refinementTime = 0;
 double DE_9IMTime = 0;
+double DE_9IMTime2 = 0;
 
 int postMBRCandidates = 0;
 int accepted = 0;
@@ -73,6 +74,10 @@ int ScontainsR = 0;
 // for testing
 int ScontainsR_DE9IM = 0;
 int RcontainsS_DE9IM = 0;
+int disjoints_DE9IM = 0;
+int equals_DE9IM = 0;
+int touch_DE9IM = 0;
+int intersect_DE9IM = 0;
 
 
 clock_t timer;
@@ -452,20 +457,20 @@ void forwardCandidatePair(uint idA, uint idB){
 
         timer = clock();
         switch ((*DE_9IM_function)(idA, idB, offsetMapR, offsetMapS, finR, finS)) {
-                case 0:
-                        writeIDsToFile(idA, idB, "Results/disjoint_pairs.txt");
-                        disjoints += 1;
-                        break;
-                case 1:
-                        writeIDsToFile(idA, idB, "Results/equal_pairs.txt");
-                        equals += 1;
-                        break;
+                // case 0:
+                //         //writeIDsToFile(idA, idB, "Results/disjoint_pairs.txt");
+                //         disjoints += 1;
+                //         break;
+                // case 1:
+                //         //writeIDsToFile(idA, idB, "Results/equal_pairs.txt");
+                //         equals += 1;
+                //         break;
                 case 8:
-                        writeIDsToFile(idA, idB, "Results/R_contains_S.txt");
+                        //writeIDsToFile(idA, idB, "Results/R_contains_S.txt");
                         RcontainsS += 1;
                         break;
                 case 9:
-                        writeIDsToFile(idA, idB, "Results/S_contains_R.txt");
+                        //writeIDsToFile(idA, idB, "Results/S_contains_R.txt");
                         ScontainsR += 1;
                         break;
                 /*case 2:
@@ -485,36 +490,41 @@ void forwardCandidatePair(uint idA, uint idB){
                         writeIDsToFile(idA, idB, "Results/S_covered_By_R_pairs.txt");
                         ScoveredByR += 1;
                         break; */
-                case 6:
-                        writeIDsToFile(idA, idB, "Results/touch_pairs.txt");
-                        touch += 1;
-                        break;
-                case 7:
-                        writeIDsToFile(idA, idB, "Results/intersect_pairs.txt");
-                        intersect += 1;
-                        break;
+                // case 6:
+                //         //writeIDsToFile(idA, idB, "Results/touch_pairs.txt");
+                //         touch += 1;
+                //         break;
+                // case 7:
+                //         //writeIDsToFile(idA, idB, "Results/intersect_pairs.txt");
+                //         intersect += 1;
+                //         break;
                 
         }
+        DE_9IMTime += (clock() - timer) / (double) CLOCKS_PER_SEC;
 
-        DE_9IMTime += (clock() - timer) / (double) CLOCKS_PER_SEC; 
-
-        
-
+        timer = clock();
         // for testing
         int result2 = 0;
         vector<uint> commonSections = DATA_SPACE.getCommonSectionsIDOfObjects(idA, idB);
                 for(auto &secID : commonSections){
                         result2 = (*join_DE9IM_pointer)(rasterIntervalsR.getPolygonByIDAndSection(secID, idA), rasterIntervalsS.getPolygonByIDAndSection(secID, idB));
 
+                        // if(result2==0){
+                        //         disjoints_DE9IM++;
+                        //         return;
+                        // }
+
                         if(result2==3) {
                                 // Write IDs to file for S inside R
-                                writeIDsToFile(idA, idB, "S_contains_R_pairs_DE9IM.txt");
+                                //writeIDsToFile(idA, idB, "S_contains_R_pairs_DE9IM.txt");
                                 ScontainsR_DE9IM++;
+                                DE_9IMTime2 += (clock() - timer) / (double) CLOCKS_PER_SEC; 
                                 
                                 return;
                         } else if (result2 == 1) {
                                 RcontainsS_DE9IM++;
-                                writeIDsToFile(idA, idB, "R_contains_S_pairs_DE9IM.txt");
+                                DE_9IMTime2 += (clock() - timer) / (double) CLOCKS_PER_SEC; 
+                                //writeIDsToFile(idA, idB, "R_contains_S_pairs_DE9IM.txt");
                                 return;
                         
                         }else if (result2==2) {
@@ -522,17 +532,20 @@ void forwardCandidatePair(uint idA, uint idB){
                                         // Write IDs to file for S inside R
                                         //writeIDsToFile(idA, idB, "R_contains_S_pairs_DE9IM.txt");
                                         RcontainsS_DE9IM++;
-                                        writeIDsToFile(idA, idB, "R_contains_S_pairs_DE9IM.txt");
+                                        DE_9IMTime2 += (clock() - timer) / (double) CLOCKS_PER_SEC; 
+                                        //writeIDsToFile(idA, idB, "R_contains_S_pairs_DE9IM.txt");
                                 
                                         return;
                                 }else if ((*DE_9IM_function)(idA, idB, offsetMapR, offsetMapS, finR, finS)==9){
                                       ScontainsR_DE9IM++;
-                                      writeIDsToFile(idA, idB, "S_contains_R_pairs_DE9IM.txt");
+                                      DE_9IMTime2 += (clock() - timer) / (double) CLOCKS_PER_SEC; 
+                                      //writeIDsToFile(idA, idB, "S_contains_R_pairs_DE9IM.txt");
                                       return;  
                                 }
 
-                        } 
+                        }
                 }
+        
 }
 
 #endif
